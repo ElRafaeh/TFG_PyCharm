@@ -1,0 +1,9 @@
+opencv-python~=4.9.0.80
+torch~=2.1.2
+torchvision
+open3d~=0.18.0
+timm
+numpy~=1.26.3
+tqdm~=4.66.1
+matplotlib~=3.8.2
+mediapipe~=0.10.9

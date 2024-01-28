@@ -2,6 +2,8 @@ import os
 import argparse
 from pointcloud_extraction import PointCloud, MonocularMapper
 from imager import Image
+from pose_extraction import PoseEstimator
+import mediapipe as mp
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -16,20 +18,36 @@ def get_parser() -> argparse.ArgumentParser:
         type=int, required=False, default=2,
         help="MiDaS model type"
     )
+    parser.add_argument(
+        '--model', '-m',
+        type=str, required=True, default='',
+        help='Model for pose estimation'
+    )
     return parser
 
 
 def main():
     args = get_parser().parse_args()
     image_path = os.path.join(os.getcwd(), args.image)
-    mapper = MonocularMapper(args.level)
+    model_path = os.path.join(os.getcwd(), args.model)
     image_sample = Image.from_file(image_path)
+
+    # Convert the image to depth map
+    mapper = MonocularMapper(args.level)
     raw_depth_map = mapper.map(image_sample.image)
     depth_map = Image.from_array(raw_depth_map)
+
+    # Extraction of the point cloud from the depth map
     cloud = PointCloud(depth_map.image)
     cloud.draw_cloud()
-    cloud.save()
 
+    # Estimation of the pose landmarks
+    estimator = PoseEstimator(model_path=model_path)
+    landmarks = estimator.get_landmarks(image_sample.image)
+    image_sample.show_landmarks(landmarks)
+
+    # Draw the cloud with the landmarks
+    cloud.draw_cloud(landmarks)
 
 if __name__ == "__main__":
     main()

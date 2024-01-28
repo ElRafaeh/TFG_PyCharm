@@ -35,3 +35,13 @@ class Image(object):
         image = self.colormap(self.image) if recolor else self.image
         plt.axis("off")
         plt.imshow(image)
+        plt.show()
+
+    def show_landmarks(self, landmarks):
+        image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+
+        for landmark in landmarks:
+            cv2.circle(image, (int(landmark[0]), int(landmark[1])), 1, (255, 0, 0), 5)
+
+        cv2.imshow('Pose estimation', image)
+        cv2.waitKey(0)

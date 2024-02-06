@@ -37,6 +37,9 @@ class Image(object):
         plt.imshow(image)
         plt.show()
 
+    def save(self, filename: str):
+        cv2.imwrite(filename, self.image)
+
     def show_landmarks(self, landmarks):
         image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
 

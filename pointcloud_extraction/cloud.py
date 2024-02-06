@@ -1,10 +1,6 @@
-import time
-
-import cv2
 import numpy as np
 import open3d as o3d
 from open3d.cpu.pybind.geometry import PointCloud
-from tqdm import tqdm
 
 
 class PointCloud(object):
@@ -38,41 +34,48 @@ class PointCloud(object):
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(array)
         return pcd
-        
-    def draw_cloud(self, landmarks = None):
+
+    def draw_cloud(self):
+        count, dim = self.array.shape
+        try:
+            if dim != 3:
+                raise ValueError(f'Expected 3 dimensions but got {dim}')
+
+            # Visualize point cloud from array
+            print(f'Displaying 3D data for {count:,} data points')
+            o3d.visualization.draw_geometries([self.cloud])
+        except Exception as e:
+            print(f'Failed to draw point cloud: {e}')
+
+    def draw_cloud_landmarks(self, landmarks):
         count, dim = self.array.shape
         try: 
             if dim != 3:
                 raise ValueError(f'Expected 3 dimensions but got {dim}')
 
-            if landmarks is None:
-                # Visualize point cloud from array
-                print(f'Displaying 3D data for {count:,} data points')
-                o3d.visualization.draw_geometries([self.cloud])
-            else:
-                vis = o3d.visualization.Visualizer()
-                vis.create_window(height=480, width=640)
+            vis = o3d.visualization.Visualizer()
+            vis.create_window(height=480, width=640)
 
-                rgb = []
+            rgb = []
 
-                for landmark in landmarks:
-                    mod_depth = self.image[landmark[1]][landmark[0]] * self.scale_factor
-                    xyz = np.array([landmark[1], landmark[0], mod_depth])
-                    rgb.append(xyz)
+            for landmark in landmarks:
+                mod_depth = self.image[landmark[1]][landmark[0]] * self.scale_factor
+                xyz = np.array([landmark[1], landmark[0], mod_depth])
+                rgb.append(xyz)
 
-                rgb = np.array(rgb)
-                pcd = self.__create_pcd(rgb)
-                o3d.io.write_point_cloud("pose.pcd", pcd)
+            rgb = np.array(rgb)
+            pcd = self.__create_pcd(rgb)
+            o3d.io.write_point_cloud("pose.pcd", pcd)
 
-                keep_running = True
-                while keep_running:
-                    keep_running = vis.poll_events()
-                    vis.update_renderer()
-                    vis.add_geometry(self.cloud)
+            keep_running = True
+            while keep_running:
+                keep_running = vis.poll_events()
+                vis.update_renderer()
+                vis.add_geometry(self.cloud)
 
         except Exception as e:
             print(f'Failed to draw point cloud: {e}')
-        
+
     def draw_voxels(self):
         try: 
             n = 1000

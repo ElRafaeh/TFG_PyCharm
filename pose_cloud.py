@@ -47,7 +47,8 @@ def main():
     image_sample.show_landmarks(landmarks)
 
     # Draw the cloud with the landmarks
-    cloud.draw_cloud(landmarks)
+    cloud.draw_cloud_landmarks(landmarks)
+
 
 if __name__ == "__main__":
     main()

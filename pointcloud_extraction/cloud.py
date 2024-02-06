@@ -9,6 +9,7 @@ class PointCloud(object):
         self.image = array
         self.array = self.__preprocess(array, self.scale_factor)
         self.cloud = self.__create_pcd(self.array)
+        self.plane = self.segmented_cloud()
 
     @staticmethod
     def avg(d):
@@ -47,7 +48,25 @@ class PointCloud(object):
         except Exception as e:
             print(f'Failed to draw point cloud: {e}')
 
-    def draw_cloud_landmarks(self, landmarks):
+    def segmented_cloud(self):
+        plane_model, inliers = self.cloud.segment_plane(distance_threshold=20,
+                                                 ransac_n=3,
+                                                 num_iterations=1000)
+
+        # [a, b, c, d] = plane_model
+        # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+
+        inlier_cloud: o3d.geometry.PointCloud = self.cloud.select_by_index(inliers)
+        inlier_cloud.paint_uniform_color([1.0, 0, 0])
+        # outlier_cloud = self.cloud.select_by_index(inliers, invert=True)
+        # o3d.visualization.draw_geometries([inlier_cloud],
+        #                                   zoom=0.8,
+        #                                   front=[-0.4999, -0.1659, -0.8499],
+        #                                   lookat=[2.1813, 2.0619, 2.0999],
+        #                                   up=[0.1204, -0.9852, 0.1215])
+        return inlier_cloud
+
+    def draw_cloud_landmarks(self, landmarks, plane_cloud = True):
         count, dim = self.array.shape
         try: 
             if dim != 3:
@@ -65,13 +84,16 @@ class PointCloud(object):
 
             rgb = np.array(rgb)
             pcd = self.__create_pcd(rgb)
+            # pcd.colors = o3d.utility.Vector3dVector(rgb)
             o3d.io.write_point_cloud("pose.pcd", pcd)
+            vis.add_geometry(self.plane if plane_cloud else self.cloud)
+            vis.add_geometry(pcd)
 
             keep_running = True
             while keep_running:
                 keep_running = vis.poll_events()
                 vis.update_renderer()
-                vis.add_geometry(self.cloud)
+
 
         except Exception as e:
             print(f'Failed to draw point cloud: {e}')

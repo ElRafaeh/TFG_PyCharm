@@ -3,7 +3,6 @@ import argparse
 from pointcloud_extraction import PointCloud, MonocularMapper
 from imager import Image
 from pose_extraction import PoseEstimator
-import mediapipe as mp
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -39,12 +38,12 @@ def main():
 
     # Extraction of the point cloud from the depth map
     cloud = PointCloud(depth_map.image)
-    cloud.draw_cloud()
+    # cloud.draw_cloud()
 
     # Estimation of the pose landmarks
     estimator = PoseEstimator(model_path=model_path)
     landmarks = estimator.get_landmarks(image_sample.image)
-    image_sample.show_landmarks(landmarks)
+    # image_sample.show_landmarks(landmarks)
 
     # Draw the cloud with the landmarks
     cloud.draw_cloud_landmarks(landmarks)

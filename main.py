@@ -1,10 +1,10 @@
 import os
 import argparse
-from pointcloud_extraction import PointCloud, MonocularMapper
+from pointcloud_extraction import PointCloud3D, MonocularMapper
 from imager import Image
 from pose_extraction import PoseEstimator
-
-
+import open3d as o3d
+import numpy as np
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -37,7 +37,7 @@ def main():
     depth_map = Image.from_array(raw_depth_map)
 
     # Extraction of the point cloud from the depth map
-    cloud = PointCloud(depth_map.image)
+    cloud = PointCloud3D(depth_map.image, image_sample.image / 255.0)
     # cloud.draw_cloud()
 
     # Estimation of the pose landmarks
@@ -46,7 +46,7 @@ def main():
     # image_sample.show_landmarks(landmarks)
 
     # Draw the cloud with the landmarks
-    cloud.draw_cloud_landmarks(landmarks)
+    cloud.draw_cloud_landmarks(landmarks, True)
 
 
 if __name__ == "__main__":

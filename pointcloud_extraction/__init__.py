@@ -1,2 +1,2 @@
-from .cloud import PointCloud
+from .cloud import PointCloud3D
 from .depthmap import MonocularMapper

@@ -1,6 +1,6 @@
 import os
 import argparse
-from pointcloud_extraction import PointCloud, MonocularMapper
+from pointcloud_extraction import PointCloud3D, MonocularMapper
 from imager import Image
 
 
@@ -26,7 +26,7 @@ def main():
     image_sample = Image.from_file(image_path)
     raw_depth_map = mapper.map(image_sample.image)
     depth_map = Image.from_array(raw_depth_map)
-    cloud = PointCloud(depth_map.image)
+    cloud = PointCloud3D(depth_map.image)
     cloud.draw_cloud()
     cloud.save()
 

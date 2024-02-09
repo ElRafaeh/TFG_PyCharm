@@ -29,12 +29,6 @@ class MonocularMapper(object):
         print(f'Ready for monocular depth estimation, running on {device_type.upper()}')
 
     def map(self, image):
-        """
-        Generate map of estimated relative depth.
-
-        Args:
-            image: Image to map
-        """
         # Transform the image for model input
         self.input_batch = self.transform(image).to(self.device)
 

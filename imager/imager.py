@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class Image(object):
-    def __init__(self, image):
+    def __init__(self, image: np.ndarray):
         self.image = image
 
     @classmethod

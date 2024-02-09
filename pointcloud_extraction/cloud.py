@@ -5,6 +5,13 @@ from open3d.cpu.pybind.geometry import PointCloud
 
 class PointCloud3D(object):
     def __init__(self, array: np.ndarray, colored_array: np.ndarray):
+        """
+            Extract the PointCloud of a depth map image
+
+            Args:
+                array: DepthMap image to extract pointcloud
+                colored_array: RGB image for extract colors to pointcloud, values [0...1]
+        """
         self.scale_factor = self.avg(array.shape) / array.max()
         self.image = array
         self.array, self.colors = self.__preprocess(array, self.scale_factor, colored_array)
@@ -98,6 +105,6 @@ class PointCloud3D(object):
         except Exception as e:
             print(f'Failed to draw voxel grid: {e}')
             
-    def save(self):
-        o3d.io.write_point_cloud("cloud.pcd", self.cloud)
+    def save(self, filename):
+        o3d.io.write_point_cloud(f'{filename}.pcd', self.cloud)
     

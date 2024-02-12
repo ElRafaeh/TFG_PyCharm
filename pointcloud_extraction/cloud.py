@@ -81,7 +81,7 @@ class PointCloud3D(object):
         return cls(depth_map.image, image / 255.0)
 
     def get_segmented_cloud(self) -> tuple[PointCloud, np.ndarray]:
-        plane_model, insiders = self.cloud.segment_plane(distance_threshold=15,
+        plane_model, insiders = self.cloud.segment_plane(distance_threshold=10,
                                                          ransac_n=3,
                                                          num_iterations=1000)
 

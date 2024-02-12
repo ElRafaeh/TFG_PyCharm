@@ -38,6 +38,7 @@ def main():
     mapper = MonocularMapper(args.level)
 
     algorithm = Algorithm(image_sample, estimator, mapper)
+    algorithm.show_landmarks_on_cloud(True)
     print('LEG LENGTH: ', algorithm.leg_distance())
     print('POINTS TO PLANE: ', algorithm.distance_landmarks_to_plane())
 

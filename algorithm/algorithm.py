@@ -54,6 +54,12 @@ class Algorithm:
             )
         )
 
-    def distance_to_plane(self):
-        print(self.landmarks3D)
-        # print
+    def distance_landmarks_to_plane(self):
+        return (
+            np.abs(
+                self.cloud.plane[0] * self.landmarks3D[:, 0] +
+                self.cloud.plane[1] * self.landmarks3D[:, 1] +
+                self.cloud.plane[2] * self.landmarks3D[:, 2] +
+                self.cloud.plane[3] * np.ones(self.landmarks3D.shape[0])
+            ) / np.sqrt(self.cloud.plane[0]**2 + self.cloud.plane[1]**2 + self.cloud.plane[2]**2)
+        )

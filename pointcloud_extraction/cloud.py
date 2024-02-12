@@ -15,7 +15,8 @@ class PointCloud3D(object):
         """
         self.scale_factor = self.avg(array.shape) / array.max()
         self.image = array
-        self.array, self.colors = self.__preprocess(array, self.scale_factor, colored_array)
+        self.array = self.__preprocess(array, self.scale_factor)
+        self.colors = colored_array.reshape((-1, colored_array.shape[-1]))
         self.cloud = self.__create_pcd(self.array, self.colors)
         self.segmented_cloud, self.plane = self.get_segmented_cloud()
 
@@ -24,21 +25,17 @@ class PointCloud3D(object):
         return sum(d) / len(d)
 
     @staticmethod
-    def __preprocess(array, scale_factor, colors):
-        rgb = []
-        point_colors = []
+    def __preprocess(array, scale_factor):
         height, width = array.shape
 
-        for row in range(height):
-            for col in range(width):
-                mod_depth = array[row][col]*scale_factor
-                xyz = np.array([row, col, mod_depth])
-                rgb.append(xyz)
-                point_colors.append(colors[row][col])
+        mod_depth = array * scale_factor
+        xyz = np.empty((height, width, 3))
+        xyz[:, :, 0] = np.arange(height)[:, np.newaxis]
+        xyz[:, :, 1] = np.arange(width)
+        xyz[:, :, 2] = mod_depth
 
-        rgb = np.array(rgb)
-        print(f'Converted raw array of shape {array.shape} to RGB array of shape {rgb.shape}')
-        return rgb, np.array(point_colors)
+        print(f'Converted raw array of shape {array.shape} to RGB array of shape {(height*width, 3)}')
+        return xyz.reshape((-1, 3))
     
     @staticmethod
     def __create_pcd(array, colors) -> PointCloud:

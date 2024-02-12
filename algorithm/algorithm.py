@@ -5,6 +5,7 @@ from depthmap_extraction import MonocularMapper
 from imager import Image
 from pointcloud_extraction import PointCloud3D
 from pose_extraction import PoseEstimator, Landmarks
+import numpy as np
 
 
 class Algorithm:
@@ -52,3 +53,7 @@ class Algorithm:
                 )
             )
         )
+
+    def distance_to_plane(self):
+        print(self.landmarks3D)
+        # print

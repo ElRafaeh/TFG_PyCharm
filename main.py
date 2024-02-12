@@ -5,7 +5,7 @@ from algorithm import Algorithm
 from pointcloud_extraction import PointCloud3D
 from depthmap_extraction import MonocularMapper
 from imager import Image
-from pose_extraction import PoseEstimator
+from pose_extraction import PoseEstimator, Landmarks
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -39,7 +39,8 @@ def main():
 
     algorithm = Algorithm(image_sample, estimator, mapper)
     print(algorithm.leg_distance())
-    algorithm.show_landmarks_on_cloud(False)
+    algorithm.show_landmarks_on_cloud(True)
+    print(algorithm.cloud.plane, algorithm.landmarks3D[Landmarks['RIGHT_ANKLE']])
 
 
 if __name__ == "__main__":

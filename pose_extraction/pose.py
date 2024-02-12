@@ -12,8 +12,11 @@ class PoseEstimator(object):
     def get_landmarks(self, image, image_format=mp.ImageFormat.SRGB):
         mp_image = mp.Image(image_format, data=image)
         detections = self.detector.detect(mp_image)
-        landmarks = detections.pose_landmarks[0]
 
+        if not detections.pose_landmarks:
+            return
+
+        landmarks = detections.pose_landmarks[0]
         return [(int(landmark.x*image.shape[1]), int(landmark.y*image.shape[0])) for landmark in landmarks]
 
 

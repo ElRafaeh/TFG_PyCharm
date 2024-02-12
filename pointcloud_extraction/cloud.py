@@ -1,6 +1,7 @@
 import numpy as np
 import open3d as o3d
 from open3d.cpu.pybind.geometry import PointCloud
+from imager import Image
 
 
 class PointCloud3D(object):
@@ -16,7 +17,7 @@ class PointCloud3D(object):
         self.image = array
         self.array, self.colors = self.__preprocess(array, self.scale_factor, colored_array)
         self.cloud = self.__create_pcd(self.array, self.colors)
-        self.plane = self.segmented_cloud()
+        self.segmented_cloud, self.plane = self.get_segmented_cloud()
 
     @staticmethod
     def avg(d):
@@ -47,50 +48,20 @@ class PointCloud3D(object):
 
         return pcd
 
-    def draw_cloud(self):
-        count, dim = self.array.shape
-        try:
-            if dim != 3:
-                raise ValueError(f'Expected 3 dimensions but got {dim}')
+    def draw_cloud(self) -> None:
+        # Visualize point cloud from array
+        o3d.visualization.draw_geometries([self.cloud])
 
-            # Visualize point cloud from array
-            print(f'Displaying 3D data for {count:,} data points')
-            o3d.visualization.draw_geometries([self.cloud])
-        except Exception as e:
-            print(f'Failed to draw point cloud: {e}')
+    def draw_cloud_landmarks3d(self, landmarks, plane_cloud=True) -> None:
+        landmarks_pcd = self.__create_pcd(array=landmarks,
+                                          colors=np.tile([1.0, 0, 0], (landmarks.shape[0], 1)))
+        o3d.visualization.draw_geometries([landmarks_pcd, self.segmented_cloud if plane_cloud else self.cloud])
 
-    def segmented_cloud(self):
-        plane_model, inliers = self.cloud.segment_plane(distance_threshold=15,
-                                                        ransac_n=3,
-                                                        num_iterations=1000)
-
-        # [a, b, c, d] = plane_model
-        # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-
-        inlier_cloud: o3d.geometry.PointCloud = self.cloud.select_by_index(inliers)
-        inlier_cloud.colors = o3d.utility.Vector3dVector(self.colors[inliers])
-
-        return inlier_cloud
-
-    def draw_cloud_landmarks(self, landmarks, plane_cloud=True):
-        count, dim = self.array.shape
-        try: 
-            if dim != 3:
-                raise ValueError(f'Expected 3 dimensions but got {dim}')
-            landmarks_points = []
-
-            for landmark in landmarks:
-                mod_depth = self.image[landmark[1]][landmark[0]] * self.scale_factor
-                xyz = np.array([landmark[1], landmark[0], mod_depth])
-                landmarks_points.append(xyz)
-
-            landmarks_points = np.array(landmarks_points)
-            landmarks_pcd = self.__create_pcd(array=landmarks_points,
-                                              colors=np.tile([1.0, 0, 0], (landmarks_points.shape[0], 1)))
-            o3d.visualization.draw_geometries([landmarks_pcd, self.plane if plane_cloud else self.cloud])
-
-        except Exception as e:
-            print(f'Failed to draw point cloud: {e}')
+    def draw_cloud_landmarks(self, landmarks, plane_cloud=True) -> None:
+        landmarks_points = self.get_landmarks_points(landmarks)
+        landmarks_pcd = self.__create_pcd(array=landmarks_points,
+                                          colors=np.tile([1.0, 0, 0], (landmarks_points.shape[0], 1)))
+        o3d.visualization.draw_geometries([landmarks_pcd, self.segmented_cloud if plane_cloud else self.cloud])
 
     def draw_voxels(self):
         try: 
@@ -104,7 +75,37 @@ class PointCloud3D(object):
 
         except Exception as e:
             print(f'Failed to draw voxel grid: {e}')
-            
+
+    @classmethod
+    def get_cloud_from_image(cls, mapper, image):
+        raw_depth_map = mapper.map(image)
+        depth_map = Image.from_array(raw_depth_map)
+
+        return cls(depth_map.image, image / 255.0)
+
+    def get_segmented_cloud(self) -> tuple[PointCloud, np.ndarray]:
+        plane_model, insiders = self.cloud.segment_plane(distance_threshold=15,
+                                                         ransac_n=3,
+                                                         num_iterations=1000)
+
+        # [a, b, c, d] = plane_model
+        # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+
+        insider_cloud: o3d.geometry.PointCloud = self.cloud.select_by_index(insiders)
+        insider_cloud.colors = o3d.utility.Vector3dVector(self.colors[insiders])
+
+        return insider_cloud, plane_model
+
+    def get_landmarks_points(self, landmarks):
+        landmarks_points = []
+
+        for landmark in landmarks:
+            mod_depth = self.image[landmark[1]][landmark[0]] * self.scale_factor
+            xyz = np.array([landmark[1], landmark[0], mod_depth])
+            landmarks_points.append(xyz)
+
+        return np.array(landmarks_points)
+
     def save(self, filename):
         o3d.io.write_point_cloud(f'{filename}.pcd', self.cloud)
     

@@ -1,10 +1,10 @@
 import math
 from time import perf_counter
 
-from depthmap_extraction import MonocularMapper
-from imager import Image
-from pointcloud_extraction import PointCloud3D
-from pose_extraction import PoseEstimator, Landmarks
+from utils.depthmap_extraction import MonocularMapper
+from utils.imager import Image
+from utils.pointcloud_extraction import PointCloud3D
+from utils.pose_extraction import PoseEstimator, Landmarks
 import numpy as np
 
 

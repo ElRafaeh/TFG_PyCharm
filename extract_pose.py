@@ -1,9 +1,9 @@
 import os
 import argparse
-from pointcloud_extraction import PointCloud3D
-from depthmap_extraction import MonocularMapper
-from imager import Image
-from pose_extraction import PoseEstimator
+from utils.pointcloud_extraction import PointCloud3D
+from utils.depthmap_extraction import MonocularMapper
+from utils.imager import Image
+from utils.pose_extraction import PoseEstimator
 
 
 def get_parser() -> argparse.ArgumentParser:

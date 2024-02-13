@@ -1,11 +1,9 @@
 import os
 import argparse
-import time
 
-from depthmap_extraction import MonocularMapper
-from pointcloud_extraction import PointCloud3D
-from imager import Image
-import open3d as o3d
+from utils.depthmap_extraction import MonocularMapper
+from utils.pointcloud_extraction import PointCloud3D
+from utils.imager import Image
 
 
 def get_parser() -> argparse.ArgumentParser:

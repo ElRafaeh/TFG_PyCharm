@@ -63,3 +63,12 @@ class Algorithm:
                 self.cloud.plane[3] * np.ones(self.landmarks3D.shape[0])
             ) / np.sqrt(self.cloud.plane[0]**2 + self.cloud.plane[1]**2 + self.cloud.plane[2]**2)
         )
+
+    @staticmethod
+    def detect_fall(leg_distance, distances):
+        if np.all(distances[23:] < leg_distance):
+            return True
+        elif np.all(distances[:23] < leg_distance):
+            return True
+        else:
+            return False

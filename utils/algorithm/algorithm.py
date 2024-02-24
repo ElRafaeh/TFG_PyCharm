@@ -6,18 +6,22 @@ from utils.imager import Image
 from utils.pointcloud_extraction import PointCloud3D
 from utils.pose_extraction import PoseEstimator, Landmarks
 import numpy as np
-
+import cv2
 
 class Algorithm:
-    def __init__(self, image: Image, estimator: PoseEstimator, mapper: MonocularMapper):
-        self.image = image
+    def __init__(self, estimator: PoseEstimator, mapper: MonocularMapper):
         self.estimator = estimator
         self.mapper = mapper
-        start = perf_counter()
-        self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
-        print(f'Elapsed cloud creation time: {perf_counter() - start:.3f}s')
-        self.landmarks = estimator.get_landmarks(self.image.image)
-        self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
+        self.image = None
+        self.cloud = None
+        self.landmarks = None
+        self.landmarks3D = None
+
+        # start = perf_counter()
+        # self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
+        # print(f'Elapsed cloud creation time: {perf_counter() - start:.3f}s')
+        # self.landmarks = estimator.get_landmarks(self.image.image)
+        # self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
 
     def show_landmarks_on_image(self):
         if self.landmarks is None:
@@ -30,6 +34,13 @@ class Algorithm:
             print("No landmarks detected")
             return
         self.cloud.draw_cloud_landmarks3d(self.landmarks3D, plane)
+
+    def run(self, image):
+        self.image = Image.from_array(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
+        self.landmarks = self.estimator.get_landmarks(self.image.image)
+        self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
+        print('FALL:', self.detect_fall())
 
     def leg_distance(self):
         # d = ((x2 - x1)2 + (y2 - y1)2 + (z2 - z1)2)1/2
@@ -55,6 +66,9 @@ class Algorithm:
         )
 
     def distance_landmarks_to_plane(self):
+        if self.landmarks3D is None:
+            return
+
         return (
             np.abs(
                 self.cloud.plane[0] * self.landmarks3D[:, 0] +
@@ -64,8 +78,12 @@ class Algorithm:
             ) / np.sqrt(self.cloud.plane[0]**2 + self.cloud.plane[1]**2 + self.cloud.plane[2]**2)
         )
 
-    @staticmethod
-    def detect_fall(leg_distance, distances):
+    def detect_fall(self):
+        leg_distance = self.leg_distance()
+        if leg_distance is None:
+            return False
+        distances = self.distance_landmarks_to_plane()
+
         if np.all(distances[23:] < leg_distance):
             return True
         elif np.all(distances[:23] < leg_distance):

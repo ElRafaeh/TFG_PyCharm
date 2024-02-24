@@ -7,3 +7,4 @@ numpy~=1.26.3
 tqdm~=4.66.1
 matplotlib~=3.8.2
 mediapipe~=0.10.9
+pytelegrambotapi~=4.16.1

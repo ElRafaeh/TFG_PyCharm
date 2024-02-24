@@ -28,7 +28,7 @@ class MonocularMapper(object):
 
         print(f'Ready for monocular depth estimation, running on {device_type.upper()}')
 
-    def map(self, image):
+    def map(self, image, DEBUG=False):
         # Transform the image for model input
         self.input_batch = self.transform(image).to(self.device)
 
@@ -43,7 +43,8 @@ class MonocularMapper(object):
                 align_corners=False,
             ).squeeze()
         end_time = perf_counter()
-        print(f'Elapsed modeling time: {end_time - start_time:.3f}s')
+        if DEBUG:
+            print(f'Elapsed modeling time: {end_time - start_time:.3f}s')
 
         # Return in array format
         return prediction.cpu().numpy()

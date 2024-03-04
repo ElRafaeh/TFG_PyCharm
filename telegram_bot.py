@@ -14,6 +14,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 def send_welcome(message):
     bot.reply_to(message, "Bienvenido a mi bot detecta caidas")
 
+
 def send_photo_example():
     img = cv2.imread('images/mayor.png')
 

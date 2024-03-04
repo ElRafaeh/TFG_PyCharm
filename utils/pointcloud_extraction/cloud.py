@@ -34,7 +34,7 @@ class PointCloud3D(object):
         xyz[:, :, 1] = np.arange(width)
         xyz[:, :, 2] = mod_depth
 
-        print(f'Converted raw array of shape {array.shape} to RGB array of shape {(height*width, 3)}')
+        # print(f'Converted raw array of shape {array.shape} to RGB array of shape {(height*width, 3)}')
         return xyz.reshape((-1, 3))
     
     @staticmethod
@@ -81,12 +81,9 @@ class PointCloud3D(object):
         return cls(depth_map.image, image / 255.0)
 
     def get_segmented_cloud(self) -> tuple[PointCloud, np.ndarray]:
-        plane_model, insiders = self.cloud.segment_plane(distance_threshold=10,
-                                                         ransac_n=3,
+        plane_model, insiders = self.cloud.segment_plane(distance_threshold=20,
+                                                         ransac_n=10,
                                                          num_iterations=1000)
-
-        # [a, b, c, d] = plane_model
-        # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
 
         insider_cloud: o3d.geometry.PointCloud = self.cloud.select_by_index(insiders)
         insider_cloud.colors = o3d.utility.Vector3dVector(self.colors[insiders])

@@ -17,7 +17,15 @@ class PoseEstimator(object):
             return
 
         landmarks = detections.pose_landmarks[0]
-        return [(int(landmark.x*image.shape[1]), int(landmark.y*image.shape[0])) for landmark in landmarks]
+
+        # detector = [
+        #
+        # ]
+        return [
+            (int(landmark.x*image.shape[1]), int(landmark.y*image.shape[0]))
+            for landmark in landmarks
+            if int(landmark.x * image.shape[1]) < image.shape[1] and int(landmark.y * image.shape[0]) < image.shape[0]
+        ]
 
 
 

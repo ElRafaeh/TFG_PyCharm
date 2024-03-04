@@ -8,6 +8,7 @@ from utils.pose_extraction import PoseEstimator, Landmarks
 import numpy as np
 import cv2
 
+
 class Algorithm:
     def __init__(self, estimator: PoseEstimator, mapper: MonocularMapper):
         self.estimator = estimator
@@ -16,7 +17,6 @@ class Algorithm:
         self.cloud = None
         self.landmarks = None
         self.landmarks3D = None
-
         # start = perf_counter()
         # self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
         # print(f'Elapsed cloud creation time: {perf_counter() - start:.3f}s')
@@ -35,17 +35,25 @@ class Algorithm:
             return
         self.cloud.draw_cloud_landmarks3d(self.landmarks3D, plane)
 
-    def run(self, image):
+    def run(self, image, debug=False):
+        start = perf_counter()
         self.image = Image.from_array(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
         self.landmarks = self.estimator.get_landmarks(self.image.image)
         self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
-        print('FALL:', self.detect_fall())
+        if debug:
+            print(f'Elapsed cloud creation time: {perf_counter() - start:.3f}s')
+            self.show_landmarks_on_image()
+            self.show_landmarks_on_cloud()
+            self.show_landmarks_on_cloud(True)
+
+        return self.detect_fall()
+        # print('FALL:' + str(self.detect_fall()), end='\r')
 
     def leg_distance(self):
         # d = ((x2 - x1)2 + (y2 - y1)2 + (z2 - z1)2)1/2
-        if self.landmarks3D is None:
-            print("No landmarks detected")
+        if self.landmarks3D is None or len(self.landmarks) < 33:
+            # print("No landmarks detected")
             return
 
         return max(
@@ -82,11 +90,11 @@ class Algorithm:
         leg_distance = self.leg_distance()
         if leg_distance is None:
             return False
-        distances = self.distance_landmarks_to_plane()
 
+        distances = self.distance_landmarks_to_plane()
         if np.all(distances[23:] < leg_distance):
             return True
         elif np.all(distances[:23] < leg_distance):
             return True
-        else:
-            return False
+
+        return False

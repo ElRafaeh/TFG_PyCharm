@@ -41,6 +41,7 @@ class Algorithm:
         self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
         self.landmarks = self.estimator.get_landmarks(self.image.image)
         self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
+        
         if debug:
             print(f'Elapsed cloud creation time: {perf_counter() - start:.3f}s')
             self.show_landmarks_on_image()

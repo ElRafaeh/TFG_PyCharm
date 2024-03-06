@@ -17,7 +17,7 @@ class CameraClient:
         self.url_server = url
 
     def threadImage(self):
-        cap = cv2.VideoCapture(-1)
+        cap = cv2.VideoCapture(0)
         while self.running:
             ret, l_frame = cap.read()
             self.frame = copy.copy(l_frame)
@@ -51,7 +51,7 @@ class CameraClient:
 
 
 if __name__ == '__main__':
-    addr = 'http://localhost:5000'
+    addr = 'http://localhost:36797'
     test_url = addr + '/processThisImage'
 
     server = CameraClient(test_url)

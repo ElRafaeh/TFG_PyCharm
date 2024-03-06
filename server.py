@@ -23,7 +23,7 @@ class ProcessingServer:
         
         fall = self.algoritmo.run(img)
 
-        cv2.putText(img, "FALL: "+str(fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+        cv2.putText(img, "FALL: "+str(fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if fall else (0, 255, 0)))
 
         _, img_encoded = cv2.imencode('.jpg', img)
         print(img_encoded)

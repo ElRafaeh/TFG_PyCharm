@@ -4,6 +4,7 @@ import cv2
 import threading
 import copy
 import numpy as np
+from time import perf_counter
 
 from utils import Algorithm, PoseEstimator, MonocularMapper
 
@@ -21,7 +22,11 @@ class ProcessingServer:
         nparr = np.frombuffer(r.data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
+        start_time = perf_counter()
         fall = self.algoritmo.run(img)
+        end_time = perf_counter()
+        
+        # print(f'Elapsed algorithm time: {end_time - start_time:.3f}s')
 
         cv2.putText(img, "FALL: "+str(fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if fall else (0, 255, 0)))
 

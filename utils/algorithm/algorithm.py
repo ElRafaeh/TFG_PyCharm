@@ -38,7 +38,7 @@ class Algorithm:
     def run(self, image, debug=False):
         start = perf_counter()
         self.image = Image.from_array(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image)
+        self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image, debug)
         self.landmarks = self.estimator.get_landmarks(self.image.image)
         self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
         

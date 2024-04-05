@@ -18,6 +18,7 @@ class Image(object):
             raise ValueError(f'The image file \"{filename}\" does not exist.')
 
         raw_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
+        print(raw_image.shape)
         rgb = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
         return cls(image=rgb)
 
@@ -41,10 +42,15 @@ class Image(object):
         cv2.imwrite(filename, self.image)
 
     def show_landmarks(self, landmarks):
-        image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        # image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        plt.axis("off")
+        plt.imshow(self.image)
 
         for landmark in landmarks:
-            cv2.circle(image, (int(landmark[0]), int(landmark[1])), 1, (255, 0, 0), 5)
+            # cv2.circle(image, (int(landmark[0]), int(landmark[1])), 1, (255, 0, 0), 5)
+            plt.scatter(int(landmark[0]), int(landmark[1]), c='blue', s=6)
+            
+        plt.show()
 
-        cv2.imshow('Pose estimation', image)
-        cv2.waitKey(0)
+        # cv2.imshow('Pose estimation', image)
+        # cv2.waitKey(0)

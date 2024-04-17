@@ -20,7 +20,7 @@ class PointCloud3D(object):
         self.array = self.__preprocess(array, self.scale_factor, DEBUG)
         self.colors = colored_array.reshape((-1, colored_array.shape[-1]))
         self.cloud = self.__create_pcd(self.array, self.colors)
-        self.segmented_cloud, self.plane = self.get_segmented_cloud()
+        self.segmented_cloud, self.plane = self.get_segmented_cloud(DEBUG)
 
     @staticmethod
     def avg(d):
@@ -72,24 +72,11 @@ class PointCloud3D(object):
                                           colors=np.tile([1.0, 0, 0], (landmarks_points.shape[0], 1)))
         o3d.visualization.draw_geometries([landmarks_pcd, self.segmented_cloud if plane_cloud else self.cloud])
 
-    def draw_voxels(self):
-        try: 
-            n = 1000
-            pcd = self.cloud
-            pcd.scale(1 / np.max(pcd.get_max_bound() - pcd.get_min_bound()), center=pcd.get_center())
-            pcd.colors = o3d.utility.Vector3dVector(np.random.uniform(0, 1, size=(n, 3)))
-            voxel_grid = o3d.geometry.VoxelGrid.create_from_point_cloud(input=pcd, voxel_size=0.01)
-            o3d.visualization.draw_geometries([voxel_grid])
-            print(f'Displaying 3D data for {voxel_grid:,} data points')  
-
-        except Exception as e:
-            print(f'Failed to draw voxel grid: {e}')
-
     def get_segmented_cloud(self, DEBUG=True) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
         ##### WITH DOWNSAMPLE DESCOMMENT THIS
-        downpcd = self.cloud.voxel_down_sample(voxel_size=20)
+        downpcd = self.cloud.voxel_down_sample(voxel_size=10)
         plane_model, insiders = downpcd.segment_plane(distance_threshold=20,
                                                         ransac_n=5,
                                                         num_iterations=2000)
@@ -104,7 +91,7 @@ class PointCloud3D(object):
         end_time = perf_counter()
         
         if self.debug:
-            # o3d.visualization.draw_geometries([insider_cloud])
+            o3d.visualization.draw_geometries([insider_cloud])
             print(f'Elapsed plane segmentation time: {end_time - start_time:.3f}s')
 
         return insider_cloud, plane_model

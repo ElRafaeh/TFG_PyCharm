@@ -72,12 +72,12 @@ class PointCloud3D(object):
                                           colors=np.tile([1.0, 0, 0], (landmarks_points.shape[0], 1)))
         o3d.visualization.draw_geometries([landmarks_pcd, self.segmented_cloud if plane_cloud else self.cloud])
 
-    def get_segmented_cloud(self, DEBUG=True) -> tuple[PointCloud, np.ndarray]:
+    def get_segmented_cloud(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
         ##### WITH DOWNSAMPLE DESCOMMENT THIS
         downpcd = self.cloud.voxel_down_sample(voxel_size=10)
-        plane_model, insiders = downpcd.segment_plane(distance_threshold=20,
+        plane_model, insiders = downpcd.segment_plane(distance_threshold=10,
                                                         ransac_n=5,
                                                         num_iterations=2000)
         insider_cloud: o3d.geometry.PointCloud = downpcd.select_by_index(insiders)
@@ -95,6 +95,35 @@ class PointCloud3D(object):
             print(f'Elapsed plane segmentation time: {end_time - start_time:.3f}s')
 
         return insider_cloud, plane_model
+    
+    def get_multiple_planes(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
+        start_time = perf_counter()
+        
+        ##### WITH DOWNSAMPLE DESCOMMENT THIS
+        downpcd = self.cloud.voxel_down_sample(voxel_size=5)
+                
+        plane_list = []
+        N = len(downpcd.points)
+        target = downpcd
+        count = 0
+
+        while count < (1 - 0.1) * N:
+            plane_model, insiders = target.segment_plane(distance_threshold=8,
+                                                        ransac_n=5,
+                                                        num_iterations=2000)
+        
+            count += len(insiders)
+            insider_cloud = target.select_by_index(insiders)
+            insider_cloud.paint_uniform_color(np.random.rand(1,3)[0])
+            outsider_cloud = target.select_by_index(insiders, invert=True)
+            # o3d.visualization.draw_geometries([insider_cloud])
+            # o3d.visualization.draw_geometries([outsider_cloud])
+            plane_list.append(insider_cloud)
+            target = outsider_cloud
+            
+        print(f'Elapsed planes segmentation time: {perf_counter() - start_time:.3f}s')
+
+        return plane_list
 
     def get_landmarks_points(self, landmarks):
         landmarks_points = []

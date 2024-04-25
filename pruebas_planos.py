@@ -1,32 +1,35 @@
 from utils import MonocularMapper, PointCloud3D, Image
 import cv2
 import open3d as o3d
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 
+img = Image.from_file('images/prueba_rafa.png')
+mapper = MonocularMapper(3)
 
-img = Image.from_file('images/mayor.png')
-
-cloud = PointCloud3D.get_cloud_from_image(
-                                          MonocularMapper(3), 
-                                          cv2.resize(img.image, (640, 360)), 
-                                          
-                                        )
+cloud = PointCloud3D.get_cloud_from_image(mapper, cv2.resize(img.image, (640, 360)))
 
 # cloud.draw_cloud()
-planes = cloud.get_multiple_planes()
-o3d.visualization.draw_geometries(planes)
+insiders, plane_models = cloud.get_multiple_planes()
+# insider_cloud, plane_model = cloud.get_segmented_cloud()
+
+print(plane_models)
+print(plane_models[:, 2])
+index = np.argmin(plane_models[:, 2])
 
 
-# cl, ind = cloud.cloud.remove_statistical_outlier(nb_neighbors=20,
-#                                                     std_ratio=2.0)
+vis = o3d.visualization.Visualizer()
+vis.create_window()
+vis.add_geometry(insiders[index])
 
-# inlier_cloud = cloud.cloud.select_by_index(ind)
-# outlier_cloud = cloud.cloud.select_by_index(ind, invert=True)
+vis2 = o3d.visualization.Visualizer()
+vis2.create_window()
 
-# print("Showing outliers (red) and inliers (gray): ")
-# outlier_cloud.paint_uniform_color([1, 0, 0])
-# # inlier_cloud.paint_uniform_color([0.8, 0.8, 0.8])
-# o3d.visualization.draw_geometries([inlier_cloud],
-#                               zoom=0.3412,
-#                               front=[0.4257, -0.2125, -0.8795],
-#                               lookat=[2.6172, 2.0475, 1.532],
-#                               up=[-0.0694, -0.9768, 0.2024])
+for insider in insiders:
+  vis2.add_geometry(insider)
+
+while True:
+  vis.poll_events()
+  vis2.poll_events()
+  

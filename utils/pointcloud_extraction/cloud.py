@@ -20,7 +20,9 @@ class PointCloud3D(object):
         self.array = self.__preprocess(array, self.scale_factor, DEBUG)
         self.colors = colored_array.reshape((-1, colored_array.shape[-1]))
         self.cloud = self.__create_pcd(self.array, self.colors)
+        # self.segmented_cloud, self.plane = self.get_floor_plane(DEBUG)
         self.segmented_cloud, self.plane = self.get_segmented_cloud(DEBUG)
+        
 
     @staticmethod
     def avg(d):
@@ -75,22 +77,14 @@ class PointCloud3D(object):
     def get_segmented_cloud(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
-        ##### WITH DOWNSAMPLE DESCOMMENT THIS
-        downpcd = self.cloud.voxel_down_sample(voxel_size=10)
-        plane_model, insiders = downpcd.segment_plane(distance_threshold=10,
+        downpcd = self.cloud.voxel_down_sample(voxel_size=5)
+        plane_model, insiders = downpcd.segment_plane(distance_threshold=8,
                                                         ransac_n=5,
                                                         num_iterations=2000)
-        insider_cloud: o3d.geometry.PointCloud = downpcd.select_by_index(insiders)
-        
-        ##### THIS IS WITH NO DOWNSAMPLE
-        # plane_model, insiders = self.cloud.segment_plane(distance_threshold=20,
-        #                                                  ransac_n=10,
-        #                                                  num_iterations=1000)
-        # insider_cloud: o3d.geometry.PointCloud = self.cloud.select_by_index(insiders)
-        
-        end_time = perf_counter()
+        insider_cloud: o3d.geometry.PointCloud = downpcd.select_by_index(insiders)        
         
         if self.debug:
+            end_time = perf_counter()
             o3d.visualization.draw_geometries([insider_cloud])
             print(f'Elapsed plane segmentation time: {end_time - start_time:.3f}s')
 
@@ -99,10 +93,10 @@ class PointCloud3D(object):
     def get_multiple_planes(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
-        ##### WITH DOWNSAMPLE DESCOMMENT THIS
         downpcd = self.cloud.voxel_down_sample(voxel_size=5)
                 
         plane_list = []
+        plane_model_list = []
         N = len(downpcd.points)
         target = downpcd
         count = 0
@@ -116,14 +110,18 @@ class PointCloud3D(object):
             insider_cloud = target.select_by_index(insiders)
             insider_cloud.paint_uniform_color(np.random.rand(1,3)[0])
             outsider_cloud = target.select_by_index(insiders, invert=True)
-            # o3d.visualization.draw_geometries([insider_cloud])
-            # o3d.visualization.draw_geometries([outsider_cloud])
             plane_list.append(insider_cloud)
+            plane_model_list.append(plane_model)
             target = outsider_cloud
             
         print(f'Elapsed planes segmentation time: {perf_counter() - start_time:.3f}s')
 
-        return plane_list
+        return plane_list, np.array(plane_model_list)
+    
+    def get_floor_plane(self, DEBUG=False):
+        plane_list, plane_model = self.get_multiple_planes(DEBUG)
+        plane_index = np.argmin(plane_model[:,2])
+        return plane_list[plane_index], plane_model[plane_index]
 
     def get_landmarks_points(self, landmarks):
         landmarks_points = []

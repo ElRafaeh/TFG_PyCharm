@@ -10,3 +10,4 @@ mediapipe~=0.10.9
 pytelegrambotapi~=4.16.1
 requests~=2.31.0
 Flask~=3.0.1
+telegram-send~=0.37

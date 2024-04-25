@@ -39,14 +39,17 @@ class Algorithm:
         self.image = Image.from_array(cv2.resize(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), (640, 360)))
         start = perf_counter()
         self.cloud = PointCloud3D.get_cloud_from_image(self.mapper, self.image.image, debug)
+        start2 = perf_counter()
         self.landmarks = self.estimator.get_landmarks(self.image.image)
         self.landmarks3D = None if not self.landmarks else self.cloud.get_landmarks_points(self.landmarks)
+        end2 = perf_counter()
         
         if debug:
-            print(f'Elapsed algorithm time: {perf_counter() - start:.3f}s')
-            self.show_landmarks_on_image()
-            self.show_landmarks_on_cloud()
-            self.show_landmarks_on_cloud(True)
+            print(f'Elapsed landmarks time: {end2 - start2:.3f}s') 
+            print(f'Elapsed algorithm time: {end2 - start:.3f}s')
+            # self.show_landmarks_on_image()
+            # self.show_landmarks_on_cloud()
+            # self.show_landmarks_on_cloud(True)
 
         return self.detect_fall()
         # print('FALL:' + str(self.detect_fall()), end='\r')

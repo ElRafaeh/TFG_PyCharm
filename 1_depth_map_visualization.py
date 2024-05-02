@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 img = Image.from_file('images/mayor.png')
 
-mapper = MonocularMapper(1)
+mapper = MonocularMapper(2)
 depth_1 = mapper.map(img.image)
 depth1 = Image.from_array(depth_1)
 

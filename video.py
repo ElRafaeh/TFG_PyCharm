@@ -3,7 +3,7 @@ from utils import PoseEstimator, Algorithm, MonocularMapper
 
 cap = cv2.VideoCapture('videos/RAFA.mkv')
 estimator = PoseEstimator('models/pose_landmarker_full.task')
-mapper = MonocularMapper(3)
+mapper = MonocularMapper(2)
 algoritmo = Algorithm(estimator, mapper)
 count = 0
 

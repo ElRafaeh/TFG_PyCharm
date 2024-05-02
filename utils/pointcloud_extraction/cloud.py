@@ -41,7 +41,6 @@ class PointCloud3D(object):
         if DEBUG:
             print(f'Elapsed creation cloud time: {perf_counter() - start_time:.3f}s')
             
-        # print(f'Converted raw array of shape {array.shape} to RGB array of shape {(height*width, 3)}')
         return xyz.reshape((-1, 3))
     
     @staticmethod
@@ -77,7 +76,11 @@ class PointCloud3D(object):
     def get_segmented_cloud(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
-        downpcd = self.cloud.voxel_down_sample(voxel_size=5)
+        cl, ind = self.cloud.remove_statistical_outlier(nb_neighbors=20,
+                                                    std_ratio=2.0)
+        inlier_cloud = self.cloud.select_by_index(ind)
+        
+        downpcd = inlier_cloud.voxel_down_sample(voxel_size=5)
         plane_model, insiders = downpcd.segment_plane(distance_threshold=8,
                                                         ransac_n=5,
                                                         num_iterations=2000)
@@ -93,7 +96,11 @@ class PointCloud3D(object):
     def get_multiple_planes(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
-        downpcd = self.cloud.voxel_down_sample(voxel_size=5)
+        
+        cl, ind = self.cloud.remove_statistical_outlier(nb_neighbors=20,
+                                                    std_ratio=2.0)
+        inlier_cloud = self.cloud.select_by_index(ind)
+        downpcd = inlier_cloud.voxel_down_sample(voxel_size=5)
                 
         plane_list = []
         plane_model_list = []

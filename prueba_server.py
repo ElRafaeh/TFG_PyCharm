@@ -24,7 +24,7 @@ class ProcessingServer:
     self.image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
     start_time = perf_counter()
-    self.fall = algoritmo.run(self.image)
+    # self.fall = algoritmo.run(self.image)
     end_time = perf_counter()
     
     # print(f'Elapsed algorithm time: {end_time - start_time:.3f}s')
@@ -41,7 +41,7 @@ class ProcessingServer:
   def show_image(self):
     while self.thread.is_alive() and self.running:
       if self.fall != None:
-        cv2.putText(self.image, "FALL: "+str(self.fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if self.fall else (0, 255, 0)))
+        # cv2.putText(self.image, "FALL: "+str(self.fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if self.fall else (0, 255, 0)))
         cv2.imshow('Detection', self.image)
         if cv2.waitKey(1) == ord('q'):
           raise(KeyboardInterrupt)

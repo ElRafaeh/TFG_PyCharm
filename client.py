@@ -15,7 +15,7 @@ class CameraClient:
         self.url_server = url
 
     def threadImage(self):
-        cap = cv2.VideoCapture('videos/RAFA.mkv')
+        cap = cv2.VideoCapture(0)
         while cap.isOpened():
             ret, l_frame = cap.read()
             if not ret:

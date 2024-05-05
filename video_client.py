@@ -8,9 +8,7 @@ import pprint
 
 
 class CameraClient:
-
     def __init__(self, url):
-
         self.frame = None
         self.running = False
         self.thread = None
@@ -18,10 +16,15 @@ class CameraClient:
 
     def threadImage(self):
         cap = cv2.VideoCapture('videos/RAFA.mkv')
-        while self.running:
+        while cap.isOpened():
             ret, l_frame = cap.read()
+            if not ret:
+                print("Can't receive frame (stream end?). Exiting ...")
+                cap.release()
+                break
             self.frame = copy.copy(l_frame)
             # print(frame)
+        self.running = False
 
     def startCamera(self):
         self.running = True
@@ -31,32 +34,24 @@ class CameraClient:
 
     def start(self):
         self.startCamera()
-        cap = cv2.VideoCapture('videos/RAFA.mkv')
 
         headers = {'contest-type': 'image/jpg'}
         pp = pprint.PrettyPrinter(indent=4)
 
-        while True:
-            ret, l_frame = cap.read()
-            frame = copy.copy(l_frame)
-            if frame is None:
+        while self.running:
+            if self.frame is None:
                 continue
 
-            # cv2.imshow("w enviado", self.frame)
-
-            _, img_encoded = cv2.imencode('.jpg', frame.copy())
-            response = requests.post(self.url_server, data=img_encoded.tobytes(), headers=headers)  # .raw
-            nparr = np.frombuffer(response._content, np.uint8)
-            img_np = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-
-            cv2.imshow("w recibido", img_np)
-            cv2.waitKey(10)
-
+            _, img_encoded = cv2.imencode('.jpg', self.frame.copy())
+            response = requests.post(self.url_server, data=img_encoded.tobytes(), headers=headers) 
+            print(response.text)
+            
+        # response = requests.post(self.url_server, data='CLOSED', headers={'contest-type': 'text/xml'}) 
+        print(response.text)
 
 if __name__ == '__main__':
     addr = 'http://localhost:5000'
     test_url = addr + '/processThisImage'
 
     server = CameraClient(test_url)
-
     server.start()

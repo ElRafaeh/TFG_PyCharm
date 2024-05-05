@@ -76,15 +76,16 @@ class PointCloud3D(object):
     def get_segmented_cloud(self, DEBUG=False) -> tuple[PointCloud, np.ndarray]:
         start_time = perf_counter()
         
-        cl, ind = self.cloud.remove_statistical_outlier(nb_neighbors=20,
-                                                    std_ratio=2.0)
+        cl, ind = self.cloud.remove_statistical_outlier(nb_neighbors=20, 
+                                                        std_ratio=2.0)
         inlier_cloud = self.cloud.select_by_index(ind)
         
         downpcd = inlier_cloud.voxel_down_sample(voxel_size=5)
+        
         plane_model, insiders = downpcd.segment_plane(distance_threshold=8,
-                                                        ransac_n=5,
-                                                        num_iterations=2000)
-        insider_cloud: o3d.geometry.PointCloud = downpcd.select_by_index(insiders)        
+                                                      ransac_n=5,
+                                                      num_iterations=2000)
+        insider_cloud: PointCloud = downpcd.select_by_index(insiders)        
         
         if self.debug:
             end_time = perf_counter()

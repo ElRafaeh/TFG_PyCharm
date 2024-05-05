@@ -20,8 +20,8 @@ class PointCloud3D(object):
         self.array = self.__preprocess(array, self.scale_factor, DEBUG)
         self.colors = colored_array.reshape((-1, colored_array.shape[-1]))
         self.cloud = self.__create_pcd(self.array, self.colors)
-        # self.segmented_cloud, self.plane = self.get_floor_plane(DEBUG)
-        self.segmented_cloud, self.plane = self.get_segmented_cloud(DEBUG)
+        self.segmented_cloud, self.plane = self.get_floor_plane(DEBUG)
+        # self.segmented_cloud, self.plane = self.get_segmented_cloud(DEBUG)
         
 
     @staticmethod
@@ -109,7 +109,7 @@ class PointCloud3D(object):
         target = downpcd
         count = 0
 
-        while count < (1 - 0.1) * N:
+        while count < (1 - 0.5) * N:
             plane_model, insiders = target.segment_plane(distance_threshold=8,
                                                         ransac_n=5,
                                                         num_iterations=2000)
@@ -122,13 +122,19 @@ class PointCloud3D(object):
             plane_model_list.append(plane_model)
             target = outsider_cloud
             
-        print(f'Elapsed planes segmentation time: {perf_counter() - start_time:.3f}s')
+        # print(f'Elapsed planes segmentation time: {perf_counter() - start_time:.3f}s')
 
         return plane_list, np.array(plane_model_list)
     
     def get_floor_plane(self, DEBUG=False):
         plane_list, plane_model = self.get_multiple_planes(DEBUG)
         plane_index = np.argmin(plane_model[:,2])
+        
+        if DEBUG:
+            o3d.visualization.draw_geometries(plane_list)
+            o3d.visualization.draw_geometries([plane_list[plane_index]])
+
+        
         return plane_list[plane_index], plane_model[plane_index]
 
     def get_landmarks_points(self, landmarks):

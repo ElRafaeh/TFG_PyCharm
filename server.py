@@ -1,44 +1,55 @@
 from flask import Flask, request, Response
-import time
 import cv2
 import threading
-import copy
 import numpy as np
 from time import perf_counter
+from concurrent.futures import ThreadPoolExecutor
 
 from utils import Algorithm, PoseEstimator, MonocularMapper
 
 
 class ProcessingServer:
+  def __init__(self, app: Flask, algorithm):
+    self.app = app
+    self.algorithm = algorithm
+    self.image = None
+    self.fall = None
+    self.thread = threading.Thread(target=self.show_image)
+    self.running = True
+    self.thread.start()
+    
+  def run(self):
+    r = request    
+    nparr = np.frombuffer(r.data, np.uint8)
+    self.image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # self.fall = True
+    start_time = perf_counter()
+    self.fall = algoritmo.run(self.image)
+    end_time = perf_counter()
+    
+    # print(f'Elapsed algorithm time: {end_time - start_time:.3f}s')
 
-    def __init__(self):
-        self.app = app = Flask(__name__)
-        estimator = PoseEstimator('models/pose_landmarker_full.task')
-        mapper = MonocularMapper(1)
-        self.algoritmo = Algorithm(estimator, mapper)
+    # print('LLEGO')
 
-    def processThisImage(self):
-        r = request
-        nparr = np.frombuffer(r.data, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    return Response(response='RECEIVED', status=200, mimetype="text/xml")
+  
+  def start(self):
+    self.app.add_url_rule('/processThisImage', 'processThisImage', self.run, methods=['POST'])
+    self.app.run(debug=True, host='0.0.0.0', use_reloader=False)
+    self.running = False
+
+  def show_image(self):
+    while self.thread.is_alive() and self.running:
+      if self.fall != None:
+        cv2.putText(self.image, "FALL: "+str(self.fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if self.fall else (0, 255, 0)))
+        cv2.imshow('Detection', self.image)
+        cv2.waitKey(1)
+            
+    print('Cerrando aplicación')
         
-        start_time = perf_counter()
-        fall = self.algoritmo.run(img)
-        end_time = perf_counter()
-        
-        # print(f'Elapsed algorithm time: {end_time - start_time:.3f}s')
-
-        cv2.putText(img, "FALL: "+str(fall), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, ((0, 0, 255) if fall else (0, 255, 0)))
-
-        _, img_encoded = cv2.imencode('.jpg', img)
-        print(img_encoded)
-        return Response(response=img_encoded.tobytes(), status=200, mimetype="image/jpeg")
-
-    def startServer(self):
-        self.app.add_url_rule('/processThisImage', "processThisImage", self.processThisImage, methods=['POST'])
-        self.app.run(debug=True, host='0.0.0.0', use_reloader=False)
-
-
 if __name__ == '__main__':
-    server = ProcessingServer()
-    server.startServer()
+    algoritmo = Algorithm(mapper=MonocularMapper(1))
+    app = Flask(__name__)
+    
+    server = ProcessingServer(app, algoritmo)
+    server.start()

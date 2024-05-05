@@ -10,7 +10,7 @@ import cv2
 
 
 class Algorithm:
-    def __init__(self, estimator: PoseEstimator, mapper: MonocularMapper):
+    def __init__(self, estimator=PoseEstimator('models/pose_landmarker_full.task'), mapper=MonocularMapper(2)):
         self.estimator = estimator
         self.mapper = mapper
         self.image = None
@@ -98,7 +98,7 @@ class Algorithm:
         distances = self.distance_landmarks_to_plane()
         if np.all(distances[23:] < leg_distance):
             return True
-        elif np.all(distances[:23] < leg_distance):
+        if np.all(distances[:23] < leg_distance):
             return True
 
         return False

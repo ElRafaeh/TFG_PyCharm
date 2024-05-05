@@ -1,17 +1,11 @@
 import cv2
 from utils import PoseEstimator, Algorithm, MonocularMapper
 
-cap = cv2.VideoCapture('videos/RAFA.mkv')
+cap = cv2.VideoCapture('datasets/FallDataset/Coffee_room_01/Videos/video (2).avi')
 estimator = PoseEstimator('models/pose_landmarker_full.task')
 mapper = MonocularMapper(2)
 algoritmo = Algorithm(estimator, mapper)
 count = 0
-
-# cap.set(cv2.CAP_PROP_POS_FRAMES, 25*7)
-# ret, frame = cap.read()
-# # cv2.imshow('frame', frame)
-# # cv2.waitKey(0)
-# algoritmo.run(frame, True)
 
 debug = False
 

@@ -1,9 +1,10 @@
 import cv2
 from utils import PoseEstimator, Algorithm, MonocularMapper
 
-cap = cv2.VideoCapture('datasets/FallDataset/Coffee_room_01/Videos/video (2).avi')
+cap = cv2.VideoCapture('datasets/FallDataset/Lecture room/video (14).avi')
+# cap = cv2.VideoCapture('videos/RAFA.mkv')
 estimator = PoseEstimator('models/pose_landmarker_full.task')
-mapper = MonocularMapper(2)
+mapper = MonocularMapper(1)
 algoritmo = Algorithm(estimator, mapper)
 count = 0
 

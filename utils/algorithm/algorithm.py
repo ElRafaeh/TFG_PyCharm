@@ -10,8 +10,8 @@ import cv2
 
 
 class Algorithm:
-    def __init__(self, estimator=PoseEstimator('models/pose_landmarker_full.task'), mapper=MonocularMapper(2)):
-        self.estimator = estimator
+    def __init__(self, mapper=MonocularMapper(1)):
+        self.estimator = PoseEstimator('models/pose_landmarker_full.task')
         self.mapper = mapper
         self.image = None
         self.cloud = None

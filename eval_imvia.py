@@ -57,12 +57,16 @@ class Evaluador:
   
   def eval(self):
     with open(f'results/{self.path}/results_{mapper}.txt', 'w') as file:
-      for index in range(self.first, self.last+1):
-        real_falls = self.read_annotations(index)
-        estimated_falls = self.run_algorithm(index)
-        compared_array = real_falls == estimated_falls
-        file.write(f'Video {index} & {round((compared_array.sum() / len(real_falls)) * 100, 2)}\\% \\\\ \n')
-      file.close()
+        
+        for index in range(self.first, self.last+1):
+          start = perf_counter()
+          real_falls = self.read_annotations(index)
+          estimated_falls = self.run_algorithm(index)
+          compared_array = real_falls == estimated_falls
+          end = perf_counter()
+          
+          file.write(f'Video {index} & {round((compared_array.sum() / len(real_falls)) * 100, 2)}\\% & {round(start - end, 2)}\\\\ \n')
+        file.close()
 
 
 
@@ -71,10 +75,6 @@ if __name__ == '__main__':
   path = 'datasets'
   dataset = 'imvia'
   directory = 'Coffee_room_01'
+  
   eval = Evaluador(path, dataset, directory, first=1, last=48)
-  start = perf_counter()
   eval.eval()
-  end = perf_counter()
-  with open(f'results/{eval.path}/time_results_{mapper}.txt', 'w') as file:
-    file.write(f'Elapsed time: {end - start} seconds')
-    file.close()

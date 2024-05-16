@@ -5,8 +5,6 @@ from time import perf_counter
 import os
 import sys
 
-mapper = 1
-
 def confusion_matrix(y_actual, y_pred):
   TP = 0
   FP = 0
@@ -100,21 +98,25 @@ if __name__ == '__main__':
   path = 'datasets'
   dataset = 'imvia'  
   
-  
-  for dir in os.listdir(f'{path}/{dataset}'):
+  for mapper in range(1,4):
     print('#########################################################################')
-    print(f'##########{dir} with filter###########')
+    print(f'##########EVALUANDO CON EL MAPPER: {mapper}###########')
     print('#########################################################################')
-    f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
-    eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline()), filter=True)
-    eval.eval()
-    f.close()
-      
-  for dir in os.listdir(f'{path}/{dataset}'):
-    print('#########################################################################')
-    print(f'##########{dir} without filter###########')
-    print('#########################################################################')
-    f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
-    eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline(), filter=False))
-    eval.eval()
-    f.close()
+    
+    for dir in os.listdir(f'{path}/{dataset}'):
+      print('#########################################################################')
+      print(f'##########{dir} with filter###########')
+      print('#########################################################################')
+      f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
+      eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline()), filter=True)
+      eval.eval()
+      f.close()
+        
+    for dir in os.listdir(f'{path}/{dataset}'):
+      print('#########################################################################')
+      print(f'##########{dir} without filter###########')
+      print('#########################################################################')
+      f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
+      eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline()), filter=False)
+      eval.eval()
+      f.close()

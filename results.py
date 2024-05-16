@@ -1,5 +1,5 @@
 
-directory = 'Coffee_room_01'
+directory = 'Home_02'
 
 def accuracy(tp, fp, tn, fn):
   return ((tp + tn)/(tp + tn + fp + fn)) * 100

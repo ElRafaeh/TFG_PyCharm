@@ -1,1 +1,0 @@
-from .imager import Image

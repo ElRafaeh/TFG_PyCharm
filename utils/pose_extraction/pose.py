@@ -14,7 +14,7 @@ class PoseEstimator(object):
         detections = self.detector.detect(mp_image)
 
         if not detections.pose_landmarks:
-            return
+            return []
 
         landmarks = detections.pose_landmarks[0]
 

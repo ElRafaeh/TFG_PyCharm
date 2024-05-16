@@ -61,6 +61,10 @@ class PointCloud3D(object):
     def draw_cloud(self) -> None:
         # Visualize point cloud from array
         o3d.visualization.draw_geometries([self.cloud])
+        
+    def draw_floor(self) -> None:
+        # Visualize point cloud from array
+        o3d.visualization.draw_geometries([self.segmented_cloud])
 
     def draw_cloud_landmarks3d(self, landmarks, plane_cloud=True) -> None:
         landmarks_pcd = self.__create_pcd(array=landmarks,
@@ -127,15 +131,22 @@ class PointCloud3D(object):
         return plane_list, np.array(plane_model_list)
     
     def get_floor_plane(self, DEBUG=False):
-        plane_list, plane_model = self.get_multiple_planes(DEBUG)
-        plane_index = np.argmin(plane_model[:,2])
+        plane_list, plane_models = self.get_multiple_planes(DEBUG)
+        # plane_index = np.argmin(plane_models[:,2])
+        
+        if len(plane_models) == 1:
+            plane_index = 0
+        else:
+            indexes = plane_models[:, 2].argsort()
+            plane_index = indexes[0] if len(plane_list[indexes[0]].points) >= len(plane_list[indexes[1]].points) else indexes[1]
+
         
         if DEBUG:
             o3d.visualization.draw_geometries(plane_list)
             o3d.visualization.draw_geometries([plane_list[plane_index]])
 
         
-        return plane_list[plane_index], plane_model[plane_index]
+        return plane_list[plane_index], plane_models[plane_index]
 
     def get_landmarks_points(self, landmarks):
         landmarks_points = []

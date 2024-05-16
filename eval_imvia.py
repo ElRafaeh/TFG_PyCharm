@@ -5,6 +5,7 @@ from time import perf_counter
 import os
 import sys
 
+mapper = 1
 
 def confusion_matrix(y_actual, y_pred):
   TP = 0
@@ -25,11 +26,12 @@ def confusion_matrix(y_actual, y_pred):
   return TP, FP, TN, FN    
 
 class Evaluador:
-  def __init__(self, path, dataset, directory, first, last) -> None:
+  def __init__(self, path, dataset, directory, first, last, filter) -> None:
     self.path = f'{path}/{dataset}/{directory}'
+    self.results_path = f'results/{path}/{dataset}/{directory}/results_{mapper}.txt' if filter else f'results/{path}/{dataset}/{directory}-no-filter/results_{mapper}.txt'
     self.first = first
     self.last = last
-    self.algorithm = Algorithm(mapper=MonocularMapper(1))
+    self.algorithm = Algorithm(mapper)
     
   def run_algorithm(self, index):
     video = cv2.VideoCapture(f'{self.path}/Videos/video ({index}).avi')
@@ -76,7 +78,7 @@ class Evaluador:
 
   
   def eval(self):
-    with open(f'results/{self.path}/results.txt', 'w') as file:
+    with open(self.results_path, 'w') as file:
       for index in range(self.first, self.last+1):
         # with open(f'results/{self.path}/videos/video_{index}.txt', 'w') as arr_file:
           real_falls = self.read_annotations(index)
@@ -94,16 +96,25 @@ class Evaluador:
 
 
 if __name__ == '__main__':
+  np.set_printoptions(threshold=sys.maxsize)
   path = 'datasets'
   dataset = 'imvia'  
-  np.set_printoptions(threshold=sys.maxsize)
   
   
   for dir in os.listdir(f'{path}/{dataset}'):
     print('#########################################################################')
-    print(f'##########{dir}###########')
+    print(f'##########{dir} with filter###########')
     print('#########################################################################')
     f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
-    eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline()))
+    eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline()), filter=True)
+    eval.eval()
+    f.close()
+      
+  for dir in os.listdir(f'{path}/{dataset}'):
+    print('#########################################################################')
+    print(f'##########{dir} without filter###########')
+    print('#########################################################################')
+    f = open(f'{path}/{dataset}/{dir}/data.txt', 'r')
+    eval = Evaluador(path, dataset, dir, first=int(f.readline()), last=int(f.readline(), filter=False))
     eval.eval()
     f.close()
